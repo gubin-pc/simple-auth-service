@@ -90,27 +90,68 @@ class ApplicationIT : IntegrationSpec() {
                     status shouldBe HttpStatusCode.BadRequest
                 }
             }
+
+            should("sign up failed because long username") {
+                client.post("/sign_up") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""
+                        {
+                          "username" : "${List(71) { "a" }.joinToString()}",
+                          "password" : "test",
+                          "role" : "Reader"
+                        }
+                    """.trimIndent())
+                }.apply {
+                    status shouldBe HttpStatusCode.BadRequest
+                }
+            }
+
+            should("sign up failed because not uniq") {
+                client.post("/sign_up") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""
+                        {
+                          "username" : "uniq",
+                          "password" : "test",
+                          "role" : "Admin"
+                        }
+                    """.trimIndent())
+                }.apply {
+                    status shouldBe HttpStatusCode.Created
+                }
+
+                client.post("/sign_up") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""
+                        {
+                          "username" : "uniq",
+                          "password" : "test",
+                          "role" : "Admin"
+                        }
+                    """.trimIndent())
+                }.apply {
+                    status shouldBe HttpStatusCode.Conflict
+                }
+            }
         }
 
         context("sing in cases") {
             should("sing in success as Admin") {
-                withAccount(role = "Admin") {account, password ->
+                withAccount(role = "Admin") { username, password, _ ->
                     client.post("/sign_in") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
-                        status shouldBe HttpStatusCode.Found
-                        headers[HttpHeaders.Location] shouldBe "/admin"
+                        status shouldBe HttpStatusCode.OK
                     }
                 }
             }
 
             should("sing in success as User") {
-                withAccount(role = "User") {account, password ->
+                withAccount(role = "User") { username, password, _ ->
                     client.post("/sign_in") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
-                        status shouldBe HttpStatusCode.Found
-                        headers[HttpHeaders.Location] shouldBe "/user"
+                        status shouldBe HttpStatusCode.OK
                     }
                 }
             }
@@ -126,9 +167,9 @@ class ApplicationIT : IntegrationSpec() {
 
         context("check access") {
             should("have access to admin endpoint as Admin") {
-                withAccount { account, password ->
+                withAccount { username, password, _ ->
                     client.get("/admin") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.OK
                     }
@@ -136,9 +177,9 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("have access to user endpoint as Admin") {
-                withAccount { account, password ->
+                withAccount { username, password, _ ->
                     client.get("/user") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.OK
                     }
@@ -146,9 +187,9 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("have access to reviewer endpoint as Reviewer") {
-                withAccount(role = "Reviewer") { account, password ->
+                withAccount(role = "Reviewer") { username, password, _ ->
                     client.get("/reviewer") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.OK
                     }
@@ -156,9 +197,9 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("don't have access to admin endpoint as Reviewer") {
-                withAccount(role = "Reviewer") { account, password ->
+                withAccount(role = "Reviewer") { username, password, _ ->
                     client.get("/admin") {
-                        basicAuth(account.username, password)
+                        basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.Forbidden
                     }
@@ -167,21 +208,20 @@ class ApplicationIT : IntegrationSpec() {
         }
 
         should("change password success"){
-            withAccount { account, password ->
+            withAccount { username, password, _ ->
                 client.post("/sign_in") {
-                    basicAuth(account.username, password)
+                    basicAuth(username, password)
                 }.apply {
-                    status shouldBe HttpStatusCode.Found
-                    headers[HttpHeaders.Location] shouldBe "/admin"
+                    status shouldBe HttpStatusCode.OK
                 }
 
                 val newPassword = "newPassword"
                 client.post("/change_password") {
-                    basicAuth(account.username, password)
+                    basicAuth(username, password)
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
-                          "username" : "${account.username}",
+                          "currentPassword" : "$password",
                           "newPassword" : "$newPassword"
                         }
                     """.trimIndent())
@@ -190,15 +230,14 @@ class ApplicationIT : IntegrationSpec() {
                 }
 
                 client.post("/sign_in") {
-                    basicAuth(account.username, newPassword)
+                    basicAuth(username, newPassword)
                 }.apply {
-                    status shouldBe HttpStatusCode.Found
-                    headers[HttpHeaders.Location] shouldBe "/admin"
+                    status shouldBe HttpStatusCode.OK
                 }
             }
         }
 
-        should("make all operation with sesstion") {
+        should("make all operation with session") {
             val client = HttpClient(CIO) {
                 install(HttpCookies)
                 defaultRequest {
@@ -206,12 +245,11 @@ class ApplicationIT : IntegrationSpec() {
                 }
             }
 
-            withAccount {account, password ->
+            withAccount { username, password, _ ->
                 val result = client.post("/sign_in") {
-                    basicAuth(account.username, password)
+                    basicAuth(username, password)
                 }
-                result.status shouldBe HttpStatusCode.Found
-                result.headers[HttpHeaders.Location] shouldBe "/admin"
+                result.status shouldBe HttpStatusCode.OK
                 val cookie = result.setCookie().first { it.name == "SESSION" }.shouldNotBeNull()
 
                 client.get("/admin") {
@@ -223,7 +261,7 @@ class ApplicationIT : IntegrationSpec() {
                 client.post("/logout") {
                     cookie(cookie.name, cookie.value, cookie.maxAge, cookie.expires, cookie.domain, cookie.path, cookie.secure, cookie.httpOnly, cookie.extensions)
                 }.apply {
-                    status shouldBe HttpStatusCode.Found
+                    status shouldBe HttpStatusCode.OK
                 }
 
                 client.get("/admin") {

@@ -21,10 +21,10 @@ class PdvIT: IntegrationSpec() {
                 async {
                     val newPassword = UUID.randomUUID().toString()
                     signUp(account.username, account.password, account.role)
-                    signIn(account.username, account.password, account.role)
+                    signIn(account.username, account.password)
                     goToEndpoint(account.username, account.password, account.role)
-                    changePassword(account.username, account.password, account.role, newPassword)
-                    signIn(account.username, newPassword, account.role)
+                    changePassword(account.username, account.password, newPassword)
+                    signIn(account.username, newPassword)
                 }
             }
 
@@ -44,22 +44,21 @@ class PdvIT: IntegrationSpec() {
         }
     }
 
-    private suspend fun signIn(username: String, password: String, role: String) {
+    private suspend fun signIn(username: String, password: String) {
         client.post("/sign_in") {
             basicAuth(username, password)
         }.apply {
-            status shouldBe HttpStatusCode.Found
-            headers[HttpHeaders.Location] shouldBe "/${role.lowercase()}"
+            status shouldBe HttpStatusCode.OK
         }
     }
 
-    private suspend fun changePassword(username: String, password: String, role: String, newPassword: String) {
+    private suspend fun changePassword(username: String, password: String, newPassword: String) {
         client.post("/change_password") {
             basicAuth(username, password)
             contentType(ContentType.Application.Json)
             setBody("""
                 {
-                  "username" : "$username",
+                  "currentPassword" : "$password",
                   "newPassword" : "$newPassword"
                 }
             """.trimIndent())

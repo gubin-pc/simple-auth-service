@@ -5,7 +5,7 @@ import io.kotest.core.listeners.ProjectListener
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import me.gubin.simple.service.persistence.configureDatabase
-import me.gubin.simple.service.routings.configureRouting
+import me.gubin.simple.service.routings.configureApiRouting
 
 
 class TestProjectConfig : AbstractProjectConfig() {
@@ -21,7 +21,7 @@ object KtorServerListener : ProjectListener {
         configurePlugins()
         configureDatabase()
         configureSecurity()
-        configureRouting()
+        configureApiRouting()
     }
 
     override suspend fun beforeProject() {

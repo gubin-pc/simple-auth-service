@@ -3,6 +3,7 @@ package me.gubin.simple.service.persistence
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
+import me.gubin.simple.service.accountService
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -38,6 +39,7 @@ fun Application.configureDatabase() {
             it[this.name] = "User"
             it[this.priority] = 200
         }
+
         commit()
 
         log.info("Applying database schema is finished")

@@ -15,12 +15,12 @@ data class CreateAccountRequest(
 }
 
 data class ChangePasswordRequest(
-    val username: String,
+    val currentPassword: String,
     val newPassword: String
 ) {
     init {
-        require(username.isNotBlank()) { "'username' can't be blank" }
-        require(newPassword.isNotBlank()) { "'password' can't be blank" }
+        require(currentPassword.isNotBlank()) { "'current password' can't be blank" }
+        require(newPassword.isNotBlank()) { "'new password' can't be blank" }
     }
 }
 

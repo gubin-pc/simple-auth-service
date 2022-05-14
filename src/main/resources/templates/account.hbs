@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Auth Service</title>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="slide navbar style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="main" style="text-align: center">
+    <label aria-hidden="true">Try to access to Endpoints</label>
+    {{#roles}}
+    <a href="javascript:void(0)" class="button two" onclick="accountRoleEndpoint('{{.}}')">{{.}}</a>
+    <br>
+    {{/roles}}
+    <button onclick="window.location.href='/reset'">Change Password</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script src="js/index.js"></script>
+
+</body>
+</html>
+<!-- partial -->
+
+</body>
+</html>

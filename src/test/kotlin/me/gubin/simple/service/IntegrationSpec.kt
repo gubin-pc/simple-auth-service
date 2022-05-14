@@ -28,16 +28,16 @@ open class IntegrationSpec : ShouldSpec() {
         role: String = "Admin",
         username: String = Instant.now().toEpochMilli().toString(),
         password: String = Instant.now().toEpochMilli().toString(),
-        block: suspend (account: Account, password: String) -> Unit,
+        block: suspend (username: String, password: String, role: String) -> Unit,
     ) {
-        val newAccount = transaction {
+        transaction {
             AccountDomain.new(UUID.randomUUID()) {
                 this.username = username
                 this.password = digestFunction(password).encodeBase64()
                 this.role = RoleDomain.find { Roles.name eq role }.first()
             }.toModel()
         }
-        block(newAccount, password)
+        block(username, password, role)
     }
 
 

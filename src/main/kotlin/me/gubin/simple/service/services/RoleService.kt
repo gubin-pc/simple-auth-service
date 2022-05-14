@@ -12,4 +12,10 @@ class RoleService {
             RoleDomain.find { Roles.name eq name }.first().toModel()
         }
     }
+
+    fun findAll(): List<Role> {
+        return transaction {
+            RoleDomain.all().map { it.toModel() }
+        }
+    }
 }

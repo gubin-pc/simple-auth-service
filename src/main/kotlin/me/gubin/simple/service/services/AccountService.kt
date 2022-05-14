@@ -9,7 +9,11 @@ import me.gubin.simple.service.persistence.Roles
 import me.gubin.simple.service.persistence.domains.toModel
 import me.gubin.simple.service.digestFunction
 import org.jetbrains.exposed.dao.with
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.util.UUID
 
 class AccountService {
@@ -22,11 +26,13 @@ class AccountService {
         }.toModel()
     }
 
-    fun update(username: String, newPassword: String): Account = transaction {
-        val account = AccountDomain.find { Accounts.username eq username }.first()
-        account.password = digestFunction(newPassword).encodeBase64()
-        account.flush()
-        account.toModel()
+    fun changePassword(username: String, currentPassword: String, newPassword: String): Boolean = transaction {
+        Accounts.update({
+            (Accounts.username eq username)
+                .and(Accounts.password eq digestFunction(currentPassword).encodeBase64())
+        }) {
+            it[password] = digestFunction(newPassword).encodeBase64()
+        } != 0
     }
 
     fun findBy(username: String, erasePassword: Boolean = true): Account? = transaction {

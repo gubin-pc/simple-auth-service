@@ -65,6 +65,11 @@
             <artifactId>ktor-server-netty-jvm</artifactId>
             <version>${ktor_version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-mustache-jvm</artifactId>
+            <version>${ktor_version}</version>
+        </dependency>
 
         <!--    Database    -->
         <dependency>
