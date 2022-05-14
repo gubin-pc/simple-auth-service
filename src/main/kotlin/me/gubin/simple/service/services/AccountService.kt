@@ -27,6 +27,11 @@ class AccountService {
     }
 
     fun changePassword(username: String, currentPassword: String, newPassword: String): Boolean = transaction {
+
+        if (findBy(username, false)?.password != digestFunction(currentPassword).encodeBase64()) {
+            throw IllegalArgumentException("incorrect current password")
+        }
+
         Accounts.update({
             (Accounts.username eq username)
                 .and(Accounts.password eq digestFunction(currentPassword).encodeBase64())

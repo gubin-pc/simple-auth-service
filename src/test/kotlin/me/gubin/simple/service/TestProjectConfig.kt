@@ -1,5 +1,6 @@
 package me.gubin.simple.service
 
+import io.kotest.common.runBlocking
 import io.kotest.core.config.AbstractProjectConfig
 import io.kotest.core.listeners.ProjectListener
 import io.ktor.server.engine.*
@@ -17,7 +18,7 @@ class TestProjectConfig : AbstractProjectConfig() {
 
 object KtorServerListener : ProjectListener {
 
-    private val embeddedServer = embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+    private val embeddedServer = embeddedServer(Netty, port = 0) {
         configurePlugins()
         configureDatabase()
         configureSecurity()
@@ -31,4 +32,7 @@ object KtorServerListener : ProjectListener {
     override suspend fun afterProject() {
             embeddedServer.stop()
     }
+
+    fun getServerPort() = runBlocking { embeddedServer.resolvedConnectors().first().port }
+
 }

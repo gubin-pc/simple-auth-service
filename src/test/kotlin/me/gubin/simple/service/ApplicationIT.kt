@@ -237,11 +237,35 @@ class ApplicationIT : IntegrationSpec() {
             }
         }
 
+        should("change password failed if current password incorrect"){
+            withAccount { username, password, _ ->
+                client.post("/sign_in") {
+                    basicAuth(username, password)
+                }.apply {
+                    status shouldBe HttpStatusCode.OK
+                }
+
+                val newPassword = "newPassword"
+                client.post("/change_password") {
+                    basicAuth(username, password)
+                    contentType(ContentType.Application.Json)
+                    setBody("""
+                        {
+                          "currentPassword" : "incorrent$password",
+                          "newPassword" : "$newPassword"
+                        }
+                    """.trimIndent())
+                }.apply {
+                    status shouldBe HttpStatusCode.BadRequest
+                }
+            }
+        }
+
         should("make all operation with session") {
             val client = HttpClient(CIO) {
                 install(HttpCookies)
                 defaultRequest {
-                    url("http://localhost:8080/")
+                    url("http://localhost:$serverPort")
                 }
             }
 

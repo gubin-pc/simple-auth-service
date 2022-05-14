@@ -7,6 +7,8 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.util.*
+import kotlinx.coroutines.runBlocking
+import me.gubin.simple.service.KtorServerListener.getServerPort
 import me.gubin.simple.service.persistence.Roles
 import me.gubin.simple.service.persistence.domains.Account
 import me.gubin.simple.service.persistence.domains.AccountDomain
@@ -18,9 +20,11 @@ import java.util.*
 
 open class IntegrationSpec : ShouldSpec() {
 
+    protected val serverPort = getServerPort()
+
     val client: HttpClient = HttpClient(CIO) {
         defaultRequest {
-            url("http://localhost:8080/")
+            url("http://localhost:$serverPort")
         }
     }
 
@@ -41,7 +45,7 @@ open class IntegrationSpec : ShouldSpec() {
     }
 
 
-    fun write(value: Any) = jacksonObjectMapper().writeValueAsString(value)
+    fun write(value: Any): String = jacksonObjectMapper().writeValueAsString(value)
     inline fun <reified T> read(value: String) = jacksonObjectMapper().readValue<T>(value)
 }
 
