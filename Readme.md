@@ -1,18 +1,18 @@
 # Simple Auth Service
 
 ## How to run
-### In docket container
+### In docker container
 
 - To run application on 8080 port use
 ```
-mvn clean package docker:build docker:run
+./mvnw clean package docker:build docker:run
 ```
 - To run application on a specific port use
   ```-Dservice.port=```
 
 Example: 
 ```
-mvn clean package docker:build docker:run -Dservice.port=9870
+./mvnw clean package docker:build docker:run -Dservice.port=9870
 ```
 
 ## Implementation note
