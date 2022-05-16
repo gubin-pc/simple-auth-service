@@ -9,6 +9,7 @@ import io.ktor.client.plugins.cookies.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import me.gubin.simple.service.persistence.domains.RoleName
 import me.gubin.simple.service.routings.AccountView
 import me.gubin.simple.service.routings.CreateAccountRequest
 
@@ -19,20 +20,20 @@ class ApplicationIT : IntegrationSpec() {
         context("sign up cases") {
 
             should("sign up success") {
-                val request = CreateAccountRequest("test", "test", "User")
-                client.post("/sign_up") {
+                val request = CreateAccountRequest("test", "test", RoleName.User)
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody(write(request))
                 }.apply {
                     status shouldBe HttpStatusCode.Created
                     val payload = read<AccountView>(bodyAsText())
                     payload.username shouldBe request.username
-                    payload.role shouldBe request.role
+                    payload.role.name shouldBe request.roleName
                 }
             }
 
             should("sign up failed with empty username") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
@@ -47,7 +48,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sign up failed with empty password") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
@@ -62,7 +63,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sign up failed with empty role") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
@@ -77,7 +78,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sign up failed with wrong role") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
@@ -92,7 +93,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sign up failed because long username") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
@@ -107,26 +108,26 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sign up failed because not uniq") {
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
                           "username" : "uniq",
                           "password" : "test",
-                          "role" : "Admin"
+                          "roleName" : "Admin"
                         }
                     """.trimIndent())
                 }.apply {
                     status shouldBe HttpStatusCode.Created
                 }
 
-                client.post("/sign_up") {
+                client.post("/sign-up") {
                     contentType(ContentType.Application.Json)
                     setBody("""
                         {
                           "username" : "uniq",
                           "password" : "test",
-                          "role" : "Admin"
+                          "roleName" : "Admin"
                         }
                     """.trimIndent())
                 }.apply {
@@ -135,10 +136,10 @@ class ApplicationIT : IntegrationSpec() {
             }
         }
 
-        context("sing in cases") {
+        context("sign in cases") {
             should("sing in success as Admin") {
                 withAccount(role = "Admin") { username, password, _ ->
-                    client.post("/sign_in") {
+                    client.post("/sign-in") {
                         basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.OK
@@ -148,7 +149,7 @@ class ApplicationIT : IntegrationSpec() {
 
             should("sing in success as User") {
                 withAccount(role = "User") { username, password, _ ->
-                    client.post("/sign_in") {
+                    client.post("/sign-in") {
                         basicAuth(username, password)
                     }.apply {
                         status shouldBe HttpStatusCode.OK
@@ -157,7 +158,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             should("sing in failed as unknown account") {
-                client.post("/sign_in") {
+                client.post("/sign-in") {
                     basicAuth("unknown", "unknown")
                 }.apply {
                     status shouldBe HttpStatusCode.Unauthorized
@@ -209,14 +210,14 @@ class ApplicationIT : IntegrationSpec() {
 
         should("change password success"){
             withAccount { username, password, _ ->
-                client.post("/sign_in") {
+                client.post("/sign-in") {
                     basicAuth(username, password)
                 }.apply {
                     status shouldBe HttpStatusCode.OK
                 }
 
                 val newPassword = "newPassword"
-                client.post("/change_password") {
+                client.post("/change-password") {
                     basicAuth(username, password)
                     contentType(ContentType.Application.Json)
                     setBody("""
@@ -229,7 +230,7 @@ class ApplicationIT : IntegrationSpec() {
                     status shouldBe HttpStatusCode.OK
                 }
 
-                client.post("/sign_in") {
+                client.post("/sign-in") {
                     basicAuth(username, newPassword)
                 }.apply {
                     status shouldBe HttpStatusCode.OK
@@ -239,14 +240,14 @@ class ApplicationIT : IntegrationSpec() {
 
         should("change password failed if current password incorrect"){
             withAccount { username, password, _ ->
-                client.post("/sign_in") {
+                client.post("/sign-in") {
                     basicAuth(username, password)
                 }.apply {
                     status shouldBe HttpStatusCode.OK
                 }
 
                 val newPassword = "newPassword"
-                client.post("/change_password") {
+                client.post("/change-password") {
                     basicAuth(username, password)
                     contentType(ContentType.Application.Json)
                     setBody("""
@@ -270,7 +271,7 @@ class ApplicationIT : IntegrationSpec() {
             }
 
             withAccount { username, password, _ ->
-                val result = client.post("/sign_in") {
+                val result = client.post("/sign-in") {
                     basicAuth(username, password)
                 }
                 result.status shouldBe HttpStatusCode.OK

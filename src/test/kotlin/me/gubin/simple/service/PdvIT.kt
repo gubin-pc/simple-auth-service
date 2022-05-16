@@ -5,6 +5,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.async
+import me.gubin.simple.service.persistence.domains.RoleName
 import me.gubin.simple.service.routings.AccountView
 import me.gubin.simple.service.routings.CreateAccountRequest
 import java.util.*
@@ -31,21 +32,21 @@ class PdvIT: IntegrationSpec() {
         }
     }
 
-    private suspend fun signUp(username: String, password: String, role: String) {
-        val request = CreateAccountRequest(username, password, role)
-        client.post("/sign_up") {
+    private suspend fun signUp(username: String, password: String, roleName: RoleName) {
+        val request = CreateAccountRequest(username, password, roleName)
+        client.post("/sign-up") {
             contentType(ContentType.Application.Json)
             setBody(write(request))
         }.apply {
             status shouldBe HttpStatusCode.Created
             val payload = read<AccountView>(bodyAsText())
             payload.username shouldBe request.username
-            payload.role shouldBe request.role
+            payload.role.name shouldBe request.roleName
         }
     }
 
     private suspend fun signIn(username: String, password: String) {
-        client.post("/sign_in") {
+        client.post("/sign-in") {
             basicAuth(username, password)
         }.apply {
             status shouldBe HttpStatusCode.OK
@@ -53,7 +54,7 @@ class PdvIT: IntegrationSpec() {
     }
 
     private suspend fun changePassword(username: String, password: String, newPassword: String) {
-        client.post("/change_password") {
+        client.post("/change-password") {
             basicAuth(username, password)
             contentType(ContentType.Application.Json)
             setBody("""
@@ -67,8 +68,8 @@ class PdvIT: IntegrationSpec() {
         }
     }
 
-    private suspend fun goToEndpoint(username: String, password: String, role: String) {
-        client.get("/${role.lowercase()}") {
+    private suspend fun goToEndpoint(username: String, password: String, roleName: RoleName) {
+        client.get("/${roleName.name.lowercase()}") {
             basicAuth(username, password)
         }.apply {
             status shouldBe HttpStatusCode.OK
@@ -78,6 +79,6 @@ class PdvIT: IntegrationSpec() {
     private data class Account (
         val username: String = UUID.randomUUID().toString(),
         val password: String = UUID.randomUUID().toString(),
-        val role: String = listOf("Admin", "Reviewer", "User").random()
+        val role: RoleName = RoleName.values().random()
     )
 }

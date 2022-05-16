@@ -13,15 +13,21 @@ class RoleDomain(id: EntityID<Int>) : IntEntity(id) {
 }
 
 data class Role(
-    val name: String,
+    val name: RoleName,
     val priority: Int
 ) {
     operator fun compareTo(role: Role?) = this.priority - (role?.priority ?: Int.MAX_VALUE)
 }
 
+enum class RoleName {
+    Admin,
+    Reviewer,
+    User;
+}
+
 fun RoleDomain.toModel(): Role {
     return Role(
-        this.name,
+        RoleName.valueOf(this.name),
         this.priority
     )
 }

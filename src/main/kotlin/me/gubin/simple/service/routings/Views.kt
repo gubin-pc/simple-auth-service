@@ -1,16 +1,17 @@
 package me.gubin.simple.service.routings
 
-import java.util.UUID
+import me.gubin.simple.service.persistence.domains.Role
+import me.gubin.simple.service.persistence.domains.RoleName
+import java.util.*
 
 data class CreateAccountRequest(
     val username: String,
     val password: String,
-    val role: String
+    val roleName: RoleName
 ) {
     init {
         require(username.isNotBlank()) { "'username' can't be blank" }
         require(password.isNotBlank()) { "'password' can't be blank" }
-        require(role.isNotBlank()) { "'role' can't be blank" }
     }
 }
 
@@ -27,5 +28,5 @@ data class ChangePasswordRequest(
 data class AccountView(
     val uuid: UUID,
     val username: String,
-    val role: String
+    val role: Role
 )

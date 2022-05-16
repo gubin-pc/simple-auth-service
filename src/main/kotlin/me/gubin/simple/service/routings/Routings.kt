@@ -3,6 +3,7 @@ package me.gubin.simple.service.routings
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -11,8 +12,12 @@ import io.ktor.server.util.*
 import me.gubin.simple.service.AUTH_NAME
 import me.gubin.simple.service.SESSION
 import me.gubin.simple.service.accountService
-import me.gubin.simple.service.plugins.withRole
 import me.gubin.simple.service.persistence.domains.Account
+import me.gubin.simple.service.persistence.domains.RoleName.Admin
+import me.gubin.simple.service.persistence.domains.RoleName.Reviewer
+import me.gubin.simple.service.persistence.domains.RoleName.User
+import me.gubin.simple.service.plugins.withRole
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 
 
 fun Application.configureApiRouting() {
@@ -20,14 +25,14 @@ fun Application.configureApiRouting() {
 
     routing {
 
-        post("/sign_up") {
+        post("/sign-up") {
             val request = call.receive<CreateAccountRequest>()
-            val account = accountService.create(request.username, request.password, request.role)
+            val account = accountService.create(request.username, request.password, request.roleName)
             call.respond(HttpStatusCode.Created, account.toView())
         }
 
         authenticate(AUTH_NAME) {
-            post("/sign_in") {
+            post("/sign-in") {
                 val account = call.principal<Account>()!!
                 call.sessions.set(Session(account.uuid, account.username, "", account.role))
                 call.respond(HttpStatusCode.OK, account.toView())
@@ -41,7 +46,7 @@ fun Application.configureApiRouting() {
                 call.respond(HttpStatusCode.OK)
             }
 
-            post("/change_password") {
+            post("/change-password") {
                 val account = call.principal<Account>()!!
                 val request = call.receive<ChangePasswordRequest>()
                 if (accountService.changePassword(account.username, request.currentPassword, request.newPassword)) {
@@ -52,7 +57,7 @@ fun Application.configureApiRouting() {
                 }
             }
 
-            withRole("Admin") {
+            withRole(Admin) {
                 get("/admin") {
                     val account = call.principal<Account>()
                     call.respondText { "You role: ${account?.role}\n" +
@@ -60,7 +65,7 @@ fun Application.configureApiRouting() {
                 }
             }
 
-            withRole("Reviewer") {
+            withRole(Reviewer) {
                 get("/reviewer") {
                     val account = call.principal<Account>()
                     call.respondText { "You role: ${account?.role}\n" +
@@ -68,7 +73,7 @@ fun Application.configureApiRouting() {
                 }
             }
 
-            withRole("User") {
+            withRole(User) {
                 get("/user") {
                     val account = call.principal<Account>()
                     call.respondText { "You role: ${account?.role}\n" +
@@ -78,12 +83,26 @@ fun Application.configureApiRouting() {
         }
 
     }
+
+    install(StatusPages) {
+        exception<IllegalArgumentException> { call, _ ->
+            call.respond(HttpStatusCode.BadRequest)
+        }
+        exception<ExposedSQLException>() { call, ex ->
+            when (ex.errorCode) {
+                23505 -> call.respond(HttpStatusCode.Conflict)
+                else -> call.respond(HttpStatusCode.InternalServerError)
+            }
+        }
+    }
+
 }
+
 
 private fun Account.toView(): AccountView {
     return AccountView(
         this.uuid,
         this.username,
-        this.role.name
+        this.role
     )
 }

@@ -1,28 +1,27 @@
 package me.gubin.simple.service.services
 
 import io.ktor.util.*
+import me.gubin.simple.service.digestFunction
+import me.gubin.simple.service.persistence.Accounts
+import me.gubin.simple.service.persistence.Roles
 import me.gubin.simple.service.persistence.domains.Account
 import me.gubin.simple.service.persistence.domains.AccountDomain
-import me.gubin.simple.service.persistence.Accounts
 import me.gubin.simple.service.persistence.domains.RoleDomain
-import me.gubin.simple.service.persistence.Roles
+import me.gubin.simple.service.persistence.domains.RoleName
 import me.gubin.simple.service.persistence.domains.toModel
-import me.gubin.simple.service.digestFunction
 import org.jetbrains.exposed.dao.with
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
-import java.util.UUID
+import java.util.*
 
 class AccountService {
 
-    fun create(username: String, password: String, role: String): Account = transaction {
+    fun create(username: String, password: String, roleName: RoleName): Account = transaction {
         AccountDomain.new(UUID.randomUUID()) {
             this.username = username
             this.password = digestFunction(password).encodeBase64()
-            this.role = RoleDomain.find { Roles.name eq role }.firstOrNull() ?: throw IllegalArgumentException()
+            this.role = RoleDomain.find { Roles.name eq roleName.name }.firstOrNull() ?: throw IllegalArgumentException()
         }.toModel()
     }
 

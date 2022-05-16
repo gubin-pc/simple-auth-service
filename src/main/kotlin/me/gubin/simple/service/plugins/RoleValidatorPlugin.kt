@@ -7,6 +7,7 @@ import io.ktor.server.routing.*
 import io.ktor.util.*
 import me.gubin.simple.service.persistence.domains.Account
 import me.gubin.simple.service.persistence.domains.Role
+import me.gubin.simple.service.persistence.domains.RoleName
 import me.gubin.simple.service.roleService
 
 @KtorDsl
@@ -33,10 +34,10 @@ val RoleValidatorPlugin: RouteScopedPlugin<RoleConfig> =
         }
     }
 
-fun Route.withRole(role: String, build: Route.() -> Unit): Route {
+fun Route.withRole(roleName: RoleName, build: Route.() -> Unit): Route {
     val authenticatedRoute = createChild(RoleValidatorRouteSelector())
     authenticatedRoute.install(RoleValidatorPlugin) {
-        this.role = roleService.findByName(role)
+        this.role = roleService.findByName(roleName)
     }
     authenticatedRoute.build()
     return authenticatedRoute

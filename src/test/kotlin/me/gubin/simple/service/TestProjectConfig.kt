@@ -7,6 +7,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import me.gubin.simple.service.persistence.configureDatabase
 import me.gubin.simple.service.routings.configureApiRouting
+import me.gubin.simple.service.routings.configureSecurity
 
 
 class TestProjectConfig : AbstractProjectConfig() {

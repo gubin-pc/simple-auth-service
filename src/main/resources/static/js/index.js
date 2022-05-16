@@ -3,7 +3,7 @@ function signUp() {
     let xhr = new XMLHttpRequest();
     let data = JSON.stringify(Object.fromEntries(new FormData(signup)));
 
-    xhr.open('POST', '/sign_up');
+    xhr.open('POST', '/sign-up');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(data);
     xhr.onload = function() {
@@ -20,7 +20,7 @@ function signIn() {
     let xhr = new XMLHttpRequest();
     let data = Object.fromEntries(new FormData(signin))
 
-    xhr.open('POST', '/sign_in', false, data.username, data.password);
+    xhr.open('POST', '/sign-in', false, data.username, data.password);
     xhr.send()
     if (xhr.status >= 400) {
         alert(`Ошибка ${xhr.status}: ${xhr.statusText}`);
@@ -60,7 +60,7 @@ function changePassword() {
     let xhr = new XMLHttpRequest();
     let data = JSON.stringify(Object.fromEntries(new FormData(reset)));
 
-    xhr.open('POST', '/change_password');
+    xhr.open('POST', '/change-password');
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(data);
     xhr.onload = function() {
