@@ -223,6 +223,9 @@
                                 <assembly>
                                     <descriptorRef>artifact</descriptorRef>
                                 </assembly>
+                                <createImageOptions>
+                                    <platform>linux/x86_64</platform>
+                                </createImageOptions>
                                 <cmd>java -jar maven/${project.build.finalName}.jar</cmd>
                                 <ports>
                                     <port>${service.port}/tcp</port>
@@ -232,7 +235,9 @@
                                 <env>
                                     <SERVICE_PORT>${service.port}</SERVICE_PORT>
                                 </env>
-                                <net>host</net>
+                                <ports>
+                                    <port>${service.port}:${service.port}</port>
+                                </ports>
                             </run>
                         </image>
                     </images>
