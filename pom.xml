@@ -13,6 +13,10 @@
         <kotlin.code.style>official</kotlin.code.style>
         <kotlin_version>1.6.21</kotlin_version>
         <logback_version>1.2.11</logback_version>
+        <h2_version>2.1.212</h2_version>
+        <hikari.version>5.0.1</hikari.version>
+        <exposed.version>0.38.2</exposed.version>
+        <kotest.version>5.3.0</kotest.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <main.class>me.gubin.simple.service.ApplicationKt</main.class>
@@ -75,12 +79,12 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.212</version>
+            <version>${h2_version}</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
+            <version>${hikari.version}</version>
         </dependency>
 
         <!--   Logging     -->
@@ -94,24 +98,24 @@
         <dependency>
             <groupId>org.jetbrains.exposed</groupId>
             <artifactId>exposed-core</artifactId>
-            <version>0.38.2</version>
+            <version>${exposed.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.exposed</groupId>
             <artifactId>exposed-dao</artifactId>
-            <version>0.38.2</version>
+            <version>${exposed.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.exposed</groupId>
             <artifactId>exposed-jdbc</artifactId>
-            <version>0.38.2</version>
+            <version>${exposed.version}</version>
         </dependency>
 
         <!--    Testing    -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
-            <version>5.3.0</version>
+            <version>${kotest.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -206,7 +210,7 @@
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>0.31.0</version>
+                <version>0.39.1</version>
                 <configuration>
                     <verbose>true</verbose>
                     <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
