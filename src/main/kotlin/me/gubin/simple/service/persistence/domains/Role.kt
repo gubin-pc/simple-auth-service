@@ -22,6 +22,7 @@ data class Role(
 enum class RoleName {
     Admin,
     Reviewer,
+    Accountant,
     User;
 }
 

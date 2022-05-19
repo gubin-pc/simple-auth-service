@@ -3,11 +3,8 @@ package me.gubin.simple.service.persistence
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
-import me.gubin.simple.service.accountService
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -38,6 +35,12 @@ fun Application.configureDatabase() {
         Roles.insert {
             it[this.name] = "User"
             it[this.priority] = 200
+        }
+
+        //add new role into database
+        Roles.insert {
+            it[this.name] = "Accountant"
+            it[this.priority] = 100
         }
 
         commit()
