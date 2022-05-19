@@ -197,6 +197,26 @@ class ApplicationIT : IntegrationSpec() {
                 }
             }
 
+            should("have access to reviewer endpoint as Accountant") {
+                withAccount(role = "Accountant") { username, password, _ ->
+                    client.get("/reviewer") {
+                        basicAuth(username, password)
+                    }.apply {
+                        status shouldBe HttpStatusCode.OK
+                    }
+                }
+            }
+
+            should("have access to accountant endpoint as Accountant") {
+                withAccount(role = "Accountant") { username, password, _ ->
+                    client.get("/accountant") {
+                        basicAuth(username, password)
+                    }.apply {
+                        status shouldBe HttpStatusCode.OK
+                    }
+                }
+            }
+
             should("don't have access to admin endpoint as Reviewer") {
                 withAccount(role = "Reviewer") { username, password, _ ->
                     client.get("/admin") {

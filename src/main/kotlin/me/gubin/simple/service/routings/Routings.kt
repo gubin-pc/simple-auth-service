@@ -71,6 +71,12 @@ fun Application.configureApiRouting() {
                     call.respondText { "You role: ${account?.role}\n" +
                             "Endpoint was call: ${call.url()}" }
                 }
+
+                get("/accountant") {
+                    val account = call.principal<Account>()
+                    call.respondText { "You role: ${account?.role}\n" +
+                            "Endpoint was call: ${call.url()}" }
+                }
             }
 
             withRole(User) {
